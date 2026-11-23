@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Little Library — 我的小图书馆</title>
+<meta name="theme-color" content="#f7c8d8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My Library">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#f7c8d8; --pink-d:#e58bb1; --cream:#fdf3d8; --lav:#ddd2f5; --mint:#cfecc9;
+  --paper:#fffaf1; --ink:#4a3f35; --ink-soft:#8a7a6a; --line:#f0e2d0;
+  --shadow:0 4px 14px rgba(180,130,90,.16);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:Georgia,'Times New Roman',serif; color:var(--ink);
+  background:
+    radial-gradient(circle at 12% 8%, #ffeef5 0, transparent 42%),
+    radial-gradient(circle at 88% 20%, #f1ebff 0, transparent 40%),
+    radial-gradient(circle at 50% 100%, #eef9ea 0, transparent 45%),
+    var(--paper);
+  min-height:100vh; padding-bottom:86px;
+}
+.hand{font-family:'Caveat','Gaegu',cursive}
+header{
+  position:sticky; top:0; z-index:20; text-align:center; padding:14px 12px 8px;
+  background:linear-gradient(180deg, rgba(255,250,241,.96), rgba(255,250,241,.82));
+  backdrop-filter:blur(6px); border-bottom:2px dashed var(--line);
+}
+header h1{margin:0; font-size:34px; color:#c96b96; letter-spacing:.5px}
+header .sub{font-size:13px; color:var(--ink-soft); margin-top:1px}
+main{max-width:640px; margin:0 auto; padding:14px 14px 10px}
+.view{display:none}
+.view.on{display:block}
+h2.sec{font-size:24px; margin:18px 2px 8px; color:#b05c85}
+h2.sec .cn{font-size:14px; color:var(--ink-soft); font-family:Georgia,serif; margin-left:6px}
+.btn{
+  display:inline-block; border:2px solid #fff; cursor:pointer; text-decoration:none;
+  background:var(--pink); color:#7c2d4e; font-family:Georgia,serif; font-weight:bold;
+  padding:10px 16px; border-radius:999px; font-size:15px; box-shadow:var(--shadow);
+}
+.btn:active{transform:scale(.97)}
+.btn.small{padding:6px 12px; font-size:13px}
+.btn.ghost{background:#fff; color:var(--ink-soft); border-color:var(--line); box-shadow:none}
+.btn.lav{background:var(--lav); color:#4c3a86}
+.btn.mint{background:var(--mint); color:#2f5d2a}
+.btn.cream{background:var(--cream); color:#7a5a17}
+.btn.danger{background:#ffd9d2; color:#93392c}
+.btn .cn{font-weight:normal; font-size:12px; opacity:.75; margin-left:4px}
+.btnrow{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0}
+/* shelf */
+.shelf{
+  display:grid; grid-template-columns:1fr 1fr; gap:16px 14px; padding:14px 10px 18px;
+  background:linear-gradient(180deg,#fff6e8,#ffedd6); border-radius:18px;
+  border:2px solid #f3dfbe; box-shadow:var(--shadow); position:relative;
+}
+.shelf::after{content:""; position:absolute; left:8px; right:8px; bottom:8px; height:8px;
+  background:#e8c491; border-radius:6px; opacity:.65}
+.book{
+  border-radius:10px 16px 16px 10px; padding:14px 12px 12px 16px; cursor:pointer;
+  min-height:132px; position:relative; box-shadow:var(--shadow); border-left:8px solid rgba(0,0,0,.13);
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.book:active{transform:scale(.98)}
+.book .en{font-family:'Caveat',cursive; font-size:25px; line-height:1.05; color:rgba(60,35,25,.85)}
+.book .cnname{font-size:14px; color:rgba(60,35,25,.65); margin-top:3px}
+.book .meta{font-size:12px; color:rgba(60,35,25,.6); margin-top:10px}
+.book .edit{
+  position:absolute; top:6px; right:6px; background:rgba(255,255,255,.75); border:none;
+  width:28px; height:28px; border-radius:50%; font-size:14px; cursor:pointer; color:#7a5a48;
+}
+/* cards & lists */
+.card{
+  background:#fff; border:2px solid var(--line); border-radius:16px; padding:14px;
+  box-shadow:var(--shadow); margin:10px 0;
+}
+.chap{
+  display:flex; gap:10px; align-items:flex-start; background:#fff; border:2px solid var(--line);
+  border-radius:14px; padding:12px; margin:8px 0; cursor:pointer; box-shadow:var(--shadow);
+}
+.chap:active{transform:scale(.99)}
+.chap .no{font-family:'Caveat',cursive; font-size:22px; color:#c96b96; min-width:38px}
+.chap .t{font-weight:bold; font-size:16px}
+.chap .tc{font-size:13px; color:var(--ink-soft)}
+.chap .m{font-size:12px; color:var(--ink-soft); margin-top:3px}
+.chip{display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; margin-left:6px; vertical-align:1px}
+.chip.unread{background:#eee; color:#777}
+.chip.read{background:var(--mint); color:#2f5d2a}
+.chip.review{background:#ffe3b3; color:#8a5a00}
+.chip.mastered{background:var(--lav); color:#4c3a86}
+.fav{color:#e8a13a; font-size:15px}
+.empty{ text-align:center; color:var(--ink-soft); padding:26px 10px; font-size:15px}
+.empty .big{font-size:38px; display:block; margin-bottom:6px}
+/* reader */
+.reader{background:#fffdf7; border:2px solid var(--line); border-radius:18px; padding:22px 18px; box-shadow:var(--shadow)}
+.reader .chno{font-family:'Caveat',cursive; color:#c96b96; font-size:22px}
+.reader h1{font-size:26px; line-height:1.25; margin:4px 0 2px}
+.reader .cnh{font-size:16px; color:var(--ink-soft); margin-bottom:6px}
+.reader .meta{font-size:13px; color:var(--ink-soft); border-bottom:2px dashed var(--line); padding-bottom:10px; margin-bottom:14px}
+.reader .body p{line-height:1.85; margin:0 0 14px}
+.reader .sect{margin-top:20px; background:#fff6ea; border:2px dashed #f0dcae; border-radius:14px; padding:12px 14px}
+.reader .sect h3{margin:0 0 6px; font-size:19px; color:#b05c85}
+.reader .sect .txt{white-space:pre-wrap; line-height:1.75; font-size:15px}
+.progressbar{height:8px; background:#f3e7d3; border-radius:99px; overflow:hidden; margin:10px 0 2px}
+.progressbar i{display:block; height:100%; background:linear-gradient(90deg,var(--pink-d),#c9a7eb); width:0%}
+/* forms */
+label.f{display:block; font-size:14px; font-weight:bold; margin:14px 0 5px}
+label.f .cn{font-weight:normal; color:var(--ink-soft); font-size:12px; margin-left:5px}
+input,select,textarea{
+  width:100%; padding:11px 12px; border:2px solid var(--line); border-radius:12px;
+  font-size:16px; font-family:Georgia,serif; background:#fff; color:var(--ink);
+}
+textarea{min-height:110px; line-height:1.6}
+textarea.tall{min-height:220px}
+.swatches{display:flex; gap:8px; flex-wrap:wrap}
+.sw{width:40px; height:40px; border-radius:12px; border:3px solid transparent; cursor:pointer}
+.sw.sel{border-color:#8a7a6a}
+/* bottom nav */
+nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex;
+  background:rgba(255,252,246,.97); border-top:2px solid var(--line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+nav button{
+  flex:1; background:none; border:none; cursor:pointer; font-family:Georgia,serif;
+  font-size:11px; color:var(--ink-soft); padding:4px 0 2px; line-height:1.25;
+}
+nav button .ic{display:block; font-size:21px}
+nav button.on{color:#c2437f; font-weight:bold}
+.note{font-size:13px; color:var(--ink-soft); line-height:1.6}
+.searchrow{display:flex; gap:8px}
+.searchrow input{flex:1}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<header>
+  <h1 class="hand">📚 My Little Library</h1>
+  <div class="sub">我的私人英语图书馆 · a little book a day, a library for life</div>
+</header>
+<main>
+
+  <!-- ============ LIBRARY ============ -->
+  <section id="view-library" class="view on">
+    <div id="continueBox"></div>
+    <h2 class="sec hand">My Bookshelf <span class="cn">我的书架</span></h2>
+    <div class="shelf" id="shelf"></div>
+    <div class="btnrow">
+      <button class="btn" onclick="openBookForm()">＋ New Book<span class="cn">新建一本书</span></button>
+      <button class="btn cream" onclick="openArticleForm()">＋ Add New Article<span class="cn">新增文章</span></button>
+    </div>
+    <p class="note">Tap a book to open it. 点一本书就能翻开它；点书右上角的 ✎ 可以改名、换颜色或删除。</p>
+  </section>
+
+  <!-- ============ BOOK (chapters) ============ -->
+  <section id="view-book" class="view">
+    <button class="btn ghost small" onclick="go('library')">← Library<span class="cn">回书架</span></button>
+    <h2 class="sec hand" id="bookTitle"></h2>
+    <div class="note" id="bookSub"></div>
+    <div class="btnrow">
+      <button class="btn cream" onclick="openArticleForm(state.bookId)">＋ Add Chapter<span class="cn">加新章节</span></button>
+      <button class="btn ghost" onclick="openBookForm(state.bookId)">✎ Edit Book<span class="cn">编辑这本书</span></button>
+      <label style="font-size:13px;color:var(--ink-soft)">Sort 排序
+        <select id="sortSel" style="width:auto;padding:6px 8px;font-size:14px" onchange="renderBook()">
+          <option value="chapter">Chapter order 章节顺序</option>
+          <option value="date">Study date 学习日期</option>
+          <option value="recent">Recently read 最近阅读</option>
+        </select>
+      </label>
+    </div>
+    <div id="chapList"></div>
+  </section>
+
+  <!-- ============ READER ============ -->
+  <section id="view-reader" class="view">
+    <button class="btn ghost small" onclick="backToBook()">← Chapters<span class="cn">回目录</span></button>
+    <div class="progressbar"><i id="progFill"></i></div>
+    <div class="note" id="progTxt" style="margin-bottom:8px"></div>
+    <article class="reader" id="readerBox"></article>
+    <div class="btnrow" id="readerBtns"></div>
+  </section>
+
+  <!-- ============ ARTICLE FORM ============ -->
+  <section id="view-articleform" class="view">
+    <button class="btn ghost small" onclick="cancelArticleForm()">← Back<span class="cn">返回</span></button>
+    <h2 class="sec hand" id="afTitle">Add New Article <span class="cn">新增文章</span></h2>
+    <label class="f">Book<span class="cn">放进哪一本书</span></label>
+    <select id="af-book"></select>
+    <label class="f">English Title<span class="cn">英文标题</span></label>
+    <input id="af-title" placeholder="e.g. My One-Minute Eyeshadow Trick">
+    <label class="f">Chinese Title<span class="cn">中文标题（可空）</span></label>
+    <input id="af-titlecn" placeholder="例如：一分钟眼影小技巧">
+    <label class="f">Study Date<span class="cn">学习日期</span></label>
+    <input id="af-date" type="date">
+    <label class="f">English Article<span class="cn">完整英文原文（整篇粘贴进来，不要拆成单词卡）</span></label>
+    <textarea id="af-body" class="tall" placeholder="Paste the full English article here…"></textarea>
+    <label class="f">Chinese Translation<span class="cn">中文翻译（可空）</span></label>
+    <textarea id="af-trans" placeholder="整篇中文翻译"></textarea>
+    <label class="f">Key Points &amp; Expressions<span class="cn">知识点 + 地道美式表达（可空）</span></label>
+    <textarea id="af-keys" placeholder="重要知识点、好用的表达，一行一个也可以"></textarea>
+    <label class="f">My Notes<span class="cn">我的学习心得（可空）</span></label>
+    <textarea id="af-notes" placeholder="今天学完这篇的想法…"></textarea>
+    <label class="f">Status<span class="cn">阅读状态</span></label>
+    <select id="af-status">
+      <option value="unread">Unread 未读</option>
+      <option value="read">Read 已读</option>
+      <option value="review">Review Again 待复习</option>
+      <option value="mastered">Mastered 已掌握</option>
+    </select>
+    <label class="f">Review Date<span class="cn">复习日期（可空，到期会在 Review 页提醒）</span></label>
+    <input id="af-review" type="date">
+    <label class="f"><input type="checkbox" id="af-fav" style="width:auto"> ⭐ Favorite<span class="cn">收藏这篇</span></label>
+    <div class="btnrow">
+      <button class="btn" onclick="saveArticle()">Save<span class="cn">保存</span></button>
+      <button class="btn ghost" onclick="cancelArticleForm()">Cancel<span class="cn">取消</span></button>
+      <button class="btn danger hidden" id="af-del" onclick="deleteArticle()">Delete<span class="cn">删除文章</span></button>
+    </div>
+  </section>
+
+  <!-- ============ BOOK FORM ============ -->
+  <section id="view-bookform" class="view">
+    <button class="btn ghost small" onclick="go('library')">← Back<span class="cn">返回</span></button>
+    <h2 class="sec hand" id="bfTitle">New Book <span class="cn">新建一本书</span></h2>
+    <label class="f">English Name<span class="cn">英文书名</span></label>
+    <input id="bf-name" placeholder="e.g. Makeup">
+    <label class="f">Chinese Name<span class="cn">中文书名</span></label>
+    <input id="bf-namecn" placeholder="例如：化妆技巧">
+    <label class="f">Cover Color<span class="cn">封面颜色</span></label>
+    <div class="swatches" id="bf-swatches"></div>
+    <div class="btnrow">
+      <button class="btn" onclick="saveBook()">Save<span class="cn">保存</span></button>
+      <button class="btn ghost" onclick="go('library')">Cancel<span class="cn">取消</span></button>
+      <button class="btn danger hidden" id="bf-del" onclick="deleteBook()">Delete Book<span class="cn">删除这本书</span></button>
+    </div>
+    <p class="note">Deleting a book also deletes its chapters. 删除书籍会连里面的文章一起删掉，删之前请先导出备份。</p>
+  </section>
+
+  <!-- ============ REVIEW ============ -->
+  <section id="view-review" class="view">
+    <h2 class="sec hand">Review <span class="cn">温故知新</span></h2>
+    <div class="btnrow">
+      <button class="btn lav" onclick="randomReview()">🎲 Random Review<span class="cn">随机抽一篇旧文章</span></button>
+    </div>
+    <div id="reviewBox"></div>
+  </section>
+
+  <!-- ============ SEARCH ============ -->
+  <section id="view-search" class="view">
+    <h2 class="sec hand">Search <span class="cn">搜索</span></h2>
+    <div class="searchrow">
+      <input id="q" placeholder="Search title, text, book… 按标题 / 正文 / 书名搜" oninput="renderSearch()">
+    </div>
+    <div id="searchBox" style="margin-top:10px"></div>
+  </section>
+
+  <!-- ============ BACKUP ============ -->
+  <section id="view-backup" class="view">
+    <h2 class="sec hand">Backup <span class="cn">备份与恢复</span></h2>
+    <div class="card">
+      <p class="note">Your articles live only on this phone (in the app's own database). 你的文章只存在这台手机里，所以请偶尔导出一份 JSON 备份，存到 iCloud 或发给自己。</p>
+      <div class="btnrow">
+        <button class="btn mint" onclick="exportJSON()">⬇ Export JSON<span class="cn">导出备份</span></button>
+        <label class="btn cream" style="cursor:pointer">⬆ Import JSON<span class="cn">导入备份</span>
+          <input type="file" id="importFile" accept=".json,application/json" class="hidden" onchange="importJSON(event)">
+        </label>
+      </div>
+      <p class="note">Import replaces everything currently in the library — you will be asked to confirm first. 导入会替换掉现在的全部内容，导入前会先弹窗确认。<br><br>Honest note: new articles get in by pasting or by JSON import. There is <b>no</b> automatic sync from any chat app — that is a future plan, not a current feature. 如实说明：目前没有自动同步功能，新文章靠粘贴或 JSON 导入，这是已实现和未来计划的区别。</p>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button id="nav-library" class="on" onclick="go('library')"><span class="ic">📚</span>Library<br>书架</button>
+  <button id="nav-review" onclick="go('review')"><span class="ic">🔁</span>Review<br>复习</button>
+  <button id="nav-search" onclick="go('search')"><span class="ic">🔍</span>Search<br>搜索</button>
+  <button id="nav-backup" onclick="go('backup')"><span class="ic">💾</span>Backup<br>备份</button>
+</nav>
+
+<script>
+/* ================= IndexedDB ================= */
+const DB_NAME='my-little-library', DB_VER=1;
+let db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,DB_VER);
+    r.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains('books')) d.createObjectStore('books',{keyPath:'id'});
+      if(!d.objectStoreNames.contains('articles')) d.createObjectStore('articles',{keyPath:'id'});
+    };
+    r.onsuccess=()=>{db=r.result;res();};
+    r.onerror=()=>rej(r.error);
+  });
+}
+function store(name,mode){return db.transaction(name,mode).objectStore(name);}
+function getAll(name){return new Promise((res,rej)=>{const q=store(name,'readonly').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);});}
+function put(name,obj){return new Promise((res,rej)=>{const q=store(name,'readwrite').put(obj);q.onsuccess=()=>res();q.onerror=()=>rej(q.error);});}
+function del(name,id){return new Promise((res,rej)=>{const q=store(name,'readwrite').delete(id);q.onsuccess=()=>res();q.onerror=()=>rej(q.error);});}
+function clearStore(name){return new Promise((res,rej)=>{const q=store(name,'readwrite').clear();q.onsuccess=()=>res();q.onerror=()=>rej(q.error);});}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COLORS=[
+  {id:'pink',bg:'#f7c8d8',label:'Pink 粉'},
+  {id:'cream',bg:'#f9e7b2',label:'Cream 奶黄'},
+  {id:'lav',bg:'#ddd2f5',label:'Lavender 浅紫'},
+  {id:'mint',bg:'#cfecc9',label:'Mint 淡绿'},
+  {id:'peach',bg:'#ffd9c2',label:'Peach 蜜桃'},
+  {id:'sky',bg:'#c9e4f7',label:'Sky 浅蓝'}
+];
+const colorBg=id=>(COLORS.find(c=>c.id===id)||COLORS[0]).bg;
+const STATUS={unread:['Unread','unread'],read:['Read','read'],review:['Review Again','review'],mastered:['Mastered','mastered']};
+
+/* ================= State ================= */
+let books=[], articles=[];
+let state={view:'library', bookId:null, articleId:null, editArticleId:null, editBookId:null, bookColor:'pink', fontSize:18, showTrans:true};
+
+async function loadAll(){
+  books=await getAll('books'); articles=await getAll('articles');
+  books.sort((a,b)=>a.createdAt-b.createdAt);
+  if(books.length===0){ await seed(); books=await getAll('books'); books.sort((a,b)=>a.createdAt-b.createdAt); }
+}
+async function seed(){
+  const starters=[
+    {name:'Makeup',nameCn:'化妆技巧',color:'pink'},
+    {name:'Skincare & Facial',nameCn:'护肤与美容',color:'cream'},
+    {name:'Daily Life',nameCn:'日常生活',color:'mint'},
+    {name:'Science & Culture',nameCn:'科学与文化',color:'lav'}
+  ];
+  for(let i=0;i<starters.length;i++){
+    await put('books',{id:uid()+i,...starters[i],createdAt:Date.now()+i});
+  }
+}
+const bookById=id=>books.find(b=>b.id===id);
+const artById=id=>articles.find(a=>a.id===id);
+const artsOf=bid=>articles.filter(a=>a.bookId===bid);
+
+/* ================= Navigation ================= */
+function go(view){
+  state.view=view;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('view-'+view).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  const nb=document.getElementById('nav-'+view); if(nb) nb.classList.add('on');
+  window.scrollTo(0,0);
+  if(view==='library') renderLibrary();
+  if(view==='review') renderReview();
+  if(view==='search') renderSearch();
+}
+function openBook(id){ state.bookId=id; document.getElementById('sortSel').value='chapter'; go('book'); renderBook(); }
+
+/* ================= Library ================= */
+function chapNo(bookId, artId){
+  const list=artsOf(bookId).slice().sort((a,b)=>a.createdAt-b.createdAt);
+  const i=list.findIndex(a=>a.id===artId); return i<0?0:i+1;
+}
+function renderLibrary(){
+  const shelf=document.getElementById('shelf');
+  shelf.innerHTML=books.map(b=>{
+    const n=artsOf(b.id).length;
+    return `<div class="book" style="background:${colorBg(b.color)}" onclick="openBook('${b.id}')">
+      <button class="edit" onclick="event.stopPropagation();openBookForm('${b.id}')" title="Edit 编辑">✎</button>
+      <div><div class="en">${esc(b.name)}</div><div class="cnname">${esc(b.nameCn||'')}</div></div>
+      <div class="meta">${n} chapter${n===1?'':'s'} · ${n} 章</div>
+    </div>`;
+  }).join('') || '<div class="empty">No books yet 还没有书</div>';
+  // Continue Reading: most recently read, unfinished
+  const cont=articles.filter(a=>a.lastReadAt && (a.progress||0)<0.98)
+    .sort((a,b)=>b.lastReadAt-a.lastReadAt)[0];
+  const box=document.getElementById('continueBox');
+  if(cont){
+    const b=bookById(cont.bookId);
+    box.innerHTML=`<div class="card" style="cursor:pointer" onclick="openReader('${cont.id}')">
+      <div class="hand" style="font-size:22px;color:#c96b96">Continue Reading · 继续阅读</div>
+      <div style="font-weight:bold;margin-top:2px">${esc(cont.title)}</div>
+      <div class="note">${esc(b?b.name:'')} · Chapter ${String(chapNo(cont.bookId,cont.id)).padStart(2,'0')} · ${Math.round((cont.progress||0)*100)}% read 已读</div>
+    </div>`;
+  } else box.innerHTML='';
+}
+
+/* ================= Book / chapters ================= */
+function statusChip(a){
+  const s=STATUS[a.status]||STATUS.unread;
+  return `<span class="chip ${s[1]}">${s[0]}</span>`;
+}
+function chapRow(a, bookId){
+  const no=String(chapNo(bookId,a.id)).padStart(2,'0');
+  return `<div class="chap" onclick="openReader('${a.id}')">
+    <div class="no">${no}</div>
+    <div style="flex:1">
+      <div class="t">${esc(a.title)} ${a.favorite?'<span class="fav">⭐</span>':''} ${statusChip(a)}</div>
+      ${a.titleCn?`<div class="tc">${esc(a.titleCn)}</div>`:''}
+      <div class="m">📅 ${esc(a.studyDate||'')} ${a.lastReadAt?`· last read 上次阅读 ${new Date(a.lastReadAt).toLocaleDateString()}`:''} ${a.reviewDate?`· 🔁 review ${esc(a.reviewDate)}`:''}</div>
+    </div>
+  </div>`;
+}
+function renderBook(){
+  const b=bookById(state.bookId); if(!b){go('library');return;}
+  document.getElementById('bookTitle').innerHTML=`${esc(b.name)} <span class="cn">${esc(b.nameCn||'')}</span>`;
+  const list=artsOf(b.id);
+  document.getElementById('bookSub').textContent=`${list.length} chapters · 共 ${list.length} 章 — tap a chapter to read 点章节开始阅读`;
+  const sort=document.getElementById('sortSel').value;
+  let sorted=list.slice();
+  if(sort==='chapter') sorted.sort((a,b2)=>a.createdAt-b2.createdAt);
+  if(sort==='date') sorted.sort((a,b2)=>(b2.studyDate||'').localeCompare(a.studyDate||''));
+  if(sort==='recent') sorted.sort((a,b2)=>(b2.lastReadAt||0)-(a.lastReadAt||0));
+  document.getElementById('chapList').innerHTML=sorted.length
+    ? sorted.map(a=>chapRow(a,b.id)).join('')
+    : `<div class="empty"><span class="big">📖</span>This book is still empty.<br>这本书还是空的，点上面的 Add Chapter 加第一篇吧。</div>`;
+}
+function backToBook(){ if(state.bookId){go('book'); renderBook();} else go('library'); }
+
+/* ================= Reader ================= */
+let scrollHandler=null;
+async function openReader(id){
+  const a=artById(id); if(!a) return;
+  state.articleId=id; state.bookId=a.bookId;
+  a.lastReadAt=Date.now(); await put('articles',a);
+  go('reader'); renderReader();
+  // restore progress
+  setTimeout(()=>{ const h=document.documentElement.scrollHeight-innerHeight; if(h>0) scrollTo(0,h*(a.progress||0)); },60);
+}
+function renderReader(){
+  const a=artById(state.articleId); if(!a) return;
+  const b=bookById(a.bookId);
+  const paras=String(a.body||'').split(/\n\s*\n/).filter(p=>p.trim()).map(p=>`<p>${esc(p.trim())}</p>`).join('');
+  const s=STATUS[a.status]||STATUS.unread;
+  document.getElementById('readerBox').innerHTML=`
+    <div class="chno">Chapter ${String(chapNo(a.bookId,a.id)).padStart(2,'0')} · ${esc(b?b.name:'')}</div>
+    <h1>${esc(a.title)}</h1>
+    ${a.titleCn?`<div class="cnh">${esc(a.titleCn)}</div>`:''}
+    <div class="meta">📅 Study date 学习日期 ${esc(a.studyDate||'')} · ${s[0]} ${a.favorite?'· ⭐ Favorite 收藏':''} ${a.reviewDate?`· 🔁 Review on ${esc(a.reviewDate)}`:''}</div>
+    <div class="body" style="font-size:${state.fontSize}px">${paras||'<p>(No text yet 还没有正文)</p>'}</div>
+    ${a.translation?`<div class="sect" id="transSect"><h3 class="hand">中文翻译 Translation</h3><div class="txt">${esc(a.translation)}</div></div>`:''}
+    ${a.keys?`<div class="sect"><h3 class="hand">Key Points &amp; Expressions 知识点与地道表达</h3><div class="txt">${esc(a.keys)}</div></div>`:''}
+    <div class="sect"><h3 class="hand">My Notes 我的笔记</h3>
+      <textarea id="noteEdit" placeholder="Write your notes here… 在这里写学习心得">${esc(a.notes||'')}</textarea>
+      <div class="btnrow"><button class="btn small mint" onclick="saveNotes()">Save Notes<span class="cn">保存笔记</span></button></div>
+    </div>`;
+  document.getElementById('readerBtns').innerHTML=`
+    <button class="btn small ghost" onclick="fontStep(-1)">A−</button>
+    <button class="btn small ghost" onclick="fontStep(1)">A＋</button>
+    ${a.translation?`<button class="btn small lav" onclick="toggleTrans()">${state.showTrans?'Hide':'Show'} Translation<span class="cn">${state.showTrans?'隐藏':'显示'}翻译</span></button>`:''}
+    <button class="btn small cream" onclick="toggleFav()">${a.favorite?'⭐ Favorited 已收藏':'☆ Favorite 收藏'}</button>
+    <button class="btn small" onclick="cycleStatus()">Mark: ${nextStatusLabel(a.status)}<span class="cn">改状态</span></button>
+    <button class="btn small mint" onclick="markReview()">🔁 Review Again<span class="cn">标记待复习</span></button>
+    <button class="btn small ghost" onclick="openArticleForm('${a.bookId}','${a.id}')">✎ Edit<span class="cn">编辑文章</span></button>`;
+  updateProg();
+  if(scrollHandler) removeEventListener('scroll',scrollHandler);
+  scrollHandler=()=>{ updateProg(); saveProgress(); };
+  addEventListener('scroll',scrollHandler,{passive:true});
+}
+function updateProg(){
+  const h=document.documentElement.scrollHeight-innerHeight;
+  const p=h>0?Math.min(1,Math.max(0,scrollY/h)):0;
+  document.getElementById('progFill').style.width=(p*100)+'%';
+  document.getElementById('progTxt').textContent='Reading progress 阅读进度 '+Math.round(p*100)+'%';
+  return p;
+}
+let progTimer=null;
+function saveProgress(){
+  if(state.view!=='reader') return;
+  clearTimeout(progTimer);
+  progTimer=setTimeout(async()=>{
+    const a=artById(state.articleId); if(!a) return;
+    a.progress=updateProg(); a.lastReadAt=Date.now(); await put('articles',a);
+  },400);
+}
+function fontStep(d){ state.fontSize=Math.min(24,Math.max(14,state.fontSize+d*2)); renderReader(); }
+function toggleTrans(){ state.showTrans=!state.showTrans; const el=document.getElementById('transSect'); if(el) el.style.display=state.showTrans?'':'none'; renderReaderSoft(); }
+function renderReaderSoft(){ const a=artById(state.articleId); if(a) renderReader(); }
+async function toggleFav(){ const a=artById(state.articleId); a.favorite=!a.favorite; await put('articles',a); renderReader(); }
+function nextStatusLabel(s){ return s==='unread'?'Read 已读':s==='read'?'Review Again 待复习':s==='review'?'Mastered 已掌握':'Unread 未读'; }
+async function cycleStatus(){
+  const a=artById(state.articleId);
+  a.status=a.status==='unread'?'read':a.status==='read'?'review':a.status==='review'?'mastered':'unread';
+  await put('articles',a); renderReader();
+}
+async function markReview(){
+  const a=artById(state.articleId);
+  a.status='review';
+  const d=new Date(); d.setDate(d.getDate()+3);
+  a.reviewDate=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  await put('articles',a); renderReader();
+  alert('Marked for review in 3 days.\n已标记：3 天后（'+a.reviewDate+'）在 Review 页提醒你复习。');
+}
+async function saveNotes(){
+  const a=artById(state.articleId);
+  a.notes=document.getElementById('noteEdit').value; await put('articles',a);
+  alert('Notes saved.\n笔记已保存。');
+}
+
+/* ================= Article form ================= */
+function fillBookSelect(sel, chosen){
+  sel.innerHTML=books.map(b=>`<option value="${b.id}" ${b.id===chosen?'selected':''}>${esc(b.name)} ${esc(b.nameCn||'')}</option>`).join('');
+}
+function openArticleForm(bookId, editId){
+  state.editArticleId=editId||null;
+  const sel=document.getElementById('af-book');
+  fillBookSelect(sel, bookId||state.bookId||(books[0]&&books[0].id));
+  const a=editId?artById(editId):null;
+  document.getElementById('afTitle').innerHTML=a?'Edit Article <span class="cn">编辑文章</span>':'Add New Article <span class="cn">新增文章</span>';
+  document.getElementById('af-title').value=a?a.title:'';
+  document.getElementById('af-titlecn').value=a?(a.titleCn||''):'';
+  document.getElementById('af-date').value=a?(a.studyDate||todayStr()):todayStr();
+  document.getElementById('af-body').value=a?(a.body||''):'';
+  document.getElementById('af-trans').value=a?(a.translation||''):'';
+  document.getElementById('af-keys').value=a?(a.keys||''):'';
+  document.getElementById('af-notes').value=a?(a.notes||''):'';
+  document.getElementById('af-status').value=a?a.status:'unread';
+  document.getElementById('af-review').value=a?(a.reviewDate||''):'';
+  document.getElementById('af-fav').checked=a?!!a.favorite:false;
+  document.getElementById('af-del').classList.toggle('hidden',!a);
+  go('articleform');
+}
+async function saveArticle(){
+  const title=document.getElementById('af-title').value.trim();
+  const body=document.getElementById('af-body').value;
+  if(!title){alert('Please add an English title first.\n先填英文标题。');return;}
+  if(!body.trim()){alert('Please paste the English article.\n先把英文原文粘贴进来。');return;}
+  const data={
+    bookId:document.getElementById('af-book').value,
+    title, titleCn:document.getElementById('af-titlecn').value.trim(),
+    studyDate:document.getElementById('af-date').value||todayStr(),
+    body, translation:document.getElementById('af-trans').value,
+    keys:document.getElementById('af-keys').value,
+    notes:document.getElementById('af-notes').value,
+    status:document.getElementById('af-status').value,
+    reviewDate:document.getElementById('af-review').value||'',
+    favorite:document.getElementById('af-fav').checked
+  };
+  if(state.editArticleId){
+    const a=artById(state.editArticleId); Object.assign(a,data); await put('articles',a);
+    articles=await getAll('articles'); openReader(a.id);
+  }else{
+    const a={id:uid(),...data,createdAt:Date.now(),lastReadAt:0,progress:0};
+    await put('articles',a); articles=await getAll('articles');
+    state.bookId=a.bookId; openReader(a.id);
+  }
+}
+async function deleteArticle(){
+  if(!state.editArticleId) return;
+  if(!confirm('Delete this article?\n确定删除这篇文章吗？删了不能恢复。')) return;
+  await del('articles',state.editArticleId);
+  articles=await getAll('articles'); backToBook();
+}
+function cancelArticleForm(){
+  if(state.editArticleId && state.articleId===state.editArticleId){ go('reader'); renderReader(); }
+  else backToBook();
+}
+
+/* ================= Book form ================= */
+function openBookForm(editId){
+  state.editBookId=editId||null;
+  const b=editId?bookById(editId):null;
+  state.bookColor=b?b.color:'pink';
+  document.getElementById('bfTitle').innerHTML=b?'Edit Book <span class="cn">编辑这本书</span>':'New Book <span class="cn">新建一本书</span>';
+  document.getElementById('bf-name').value=b?b.name:'';
+  document.getElementById('bf-namecn').value=b?(b.nameCn||''):'';
+  document.getElementById('bf-del').classList.toggle('hidden',!b);
+  document.getElementById('bf-swatches').innerHTML=COLORS.map(c=>
+    `<div class="sw ${c.id===state.bookColor?'sel':''}" style="background:${c.bg}" title="${c.label}" onclick="pickColor('${c.id}')"></div>`).join('');
+  go('bookform');
+}
+function pickColor(id){ state.bookColor=id; openBookFormRefresh(); }
+function openBookFormRefresh(){
+  document.querySelectorAll('#bf-swatches .sw').forEach((el,i)=>el.classList.toggle('sel',COLORS[i].id===state.bookColor));
+}
+async function saveBook(){
+  const name=document.getElementById('bf-name').value.trim();
+  if(!name){alert('Please add an English book name.\n先填英文书名。');return;}
+  const nameCn=document.getElementById('bf-namecn').value.trim();
+  if(state.editBookId){
+    const b=bookById(state.editBookId); b.name=name; b.nameCn=nameCn; b.color=state.bookColor;
+    await put('books',b); books=await getAll('books'); books.sort((a,b2)=>a.createdAt-b2.createdAt);
+    openBook(b.id);
+  }else{
+    const b={id:uid(),name,nameCn,color:state.bookColor,createdAt:Date.now()};
+    await put('books',b); books=await getAll('books'); books.sort((a,b2)=>a.createdAt-b2.createdAt);
+    openBook(b.id);
+  }
+}
+async function deleteBook(){
+  if(!state.editBookId) return;
+  const list=artsOf(state.editBookId);
+  if(!confirm(`Delete this book and its ${list.length} chapter(s)?\n确定删除这本书和里面的 ${list.length} 篇文章吗？删了不能恢复。`)) return;
+  for(const a of list) await del('articles',a.id);
+  await del('books',state.editBookId);
+  books=await getAll('books'); articles=await getAll('articles');
+  state.bookId=null; go('library');
+}
+
+/* ================= Review ================= */
+function miniRow(a){
+  const b=bookById(a.bookId);
+  return `<div class="chap" onclick="openReader('${a.id}')">
+    <div style="flex:1">
+      <div class="t">${esc(a.title)} ${a.favorite?'<span class="fav">⭐</span>':''} ${statusChip(a)}</div>
+      <div class="m">${esc(b?b.name:'')} · Ch.${String(chapNo(a.bookId,a.id)).padStart(2,'0')} · 📅 ${esc(a.studyDate||'')}</div>
+    </div></div>`;
+}
+function renderReview(){
+  const t=todayStr();
+  const todays=articles.filter(a=>a.studyDate===t);
+  const due=articles.filter(a=>a.reviewDate && a.reviewDate<=t && a.status!=='mastered')
+    .sort((a,b)=>a.reviewDate.localeCompare(b.reviewDate));
+  const cont=articles.filter(a=>a.lastReadAt && (a.progress||0)<0.98).sort((a,b)=>b.lastReadAt-a.lastReadAt)[0];
+  const favs=articles.filter(a=>a.favorite);
+  const hist=articles.filter(a=>a.lastReadAt).sort((a,b)=>b.lastReadAt-a.lastReadAt).slice(0,20);
+  const past=articles.filter(a=>a.studyDate<t);
+  let h='';
+  if(cont) h+=`<h2 class="sec hand">Continue Reading <span class="cn">继续阅读</span></h2>${miniRow(cont)}`;
+  h+=`<h2 class="sec hand">Today's Reading <span class="cn">今天的学习</span></h2>`+
+    (todays.length?todays.map(miniRow).join(''):'<div class="empty">Nothing new today yet.<br>今天还没加新文章，点书架上的 Add New Article 开始吧。</div>');
+  h+=`<h2 class="sec hand">Due for Review <span class="cn">到期复习</span></h2>`+
+    (due.length?due.map(miniRow).join(''):'<div class="empty">Nothing due. 没有到期的复习 🎉</div>');
+  h+=`<h2 class="sec hand">Review Library <span class="cn">以前学过的 · 共 ${past.length} 篇</span></h2>`+
+    (past.length?past.slice().sort((a,b)=>(b.studyDate||'').localeCompare(a.studyDate||'')).slice(0,30).map(miniRow).join(''):'<div class="empty">No past articles yet. 还没有旧文章。</div>');
+  h+=`<h2 class="sec hand">Favorite Articles <span class="cn">收藏夹</span></h2>`+
+    (favs.length?favs.map(miniRow).join(''):'<div class="empty">No favorites yet. 还没有收藏，在阅读页点 ☆ Favorite 就能收藏。</div>');
+  h+=`<h2 class="sec hand">Reading History <span class="cn">阅读记录</span></h2>`+
+    (hist.length?hist.map(a=>{const b=bookById(a.bookId);return `<div class="chap" onclick="openReader('${a.id}')"><div style="flex:1"><div class="t">${esc(a.title)}</div><div class="m">${esc(b?b.name:'')} · read at 阅读于 ${new Date(a.lastReadAt).toLocaleString()}</div></div></div>`;}).join('')
+      :'<div class="empty">No reading history yet. 还没有阅读记录。</div>');
+  document.getElementById('reviewBox').innerHTML=h;
+}
+function randomReview(){
+  if(!articles.length){alert('Your library is empty.\n图书馆还是空的，先加一篇文章吧。');return;}
+  const past=articles.filter(a=>a.studyDate<todayStr());
+  const pool=past.length?past:articles;
+  openReader(pool[Math.floor(Math.random()*pool.length)].id);
+}
+
+/* ================= Search ================= */
+function renderSearch(){
+  const q=(document.getElementById('q').value||'').trim().toLowerCase();
+  const box=document.getElementById('searchBox');
+  if(!q){ box.innerHTML='<div class="empty">Type above to search all your articles.<br>在上面输入，就能搜全部文章的标题和正文。</div>'; return; }
+  const hits=articles.filter(a=>{
+    const b=bookById(a.bookId);
+    return a.title.toLowerCase().includes(q)||(a.titleCn||'').toLowerCase().includes(q)||
+      (a.body||'').toLowerCase().includes(q)||(b&&b.name.toLowerCase().includes(q));
+  });
+  box.innerHTML=hits.length?hits.map(miniRow).join(''):'<div class="empty">No matches. 没搜到。</div>';
+}
+
+/* ================= Backup ================= */
+function exportJSON(){
+  const data={app:'my-little-library',version:1,exportedAt:new Date().toISOString(),books,articles};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const aEl=document.createElement('a');
+  aEl.href=URL.createObjectURL(blob);
+  aEl.download='my-little-library-backup-'+todayStr()+'.json';
+  aEl.click(); setTimeout(()=>URL.revokeObjectURL(aEl.href),2000);
+}
+function importJSON(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    try{
+      const data=JSON.parse(r.result);
+      if(!data||!Array.isArray(data.books)||!Array.isArray(data.articles)) throw new Error('bad');
+      if(!confirm('Import will REPLACE your whole library ('+data.books.length+' books, '+data.articles.length+' articles). Continue?\n导入会替换掉现在的整个图书馆（'+data.books.length+' 本书、'+data.articles.length+' 篇文章）。确定继续吗？')) return;
+      await clearStore('books'); await clearStore('articles');
+      for(const b of data.books) await put('books',b);
+      for(const a of data.articles) await put('articles',a);
+      await loadAll(); go('library');
+      alert('Import done.\n导入完成。');
+    }catch(e){ alert('That file is not a valid library backup.\n这个文件不是有效的图书馆备份。'); }
+    ev.target.value='';
+  };
+  r.readAsText(f);
+}
+
+/* ================= Init ================= */
+(async()=>{
+  await openDB(); await loadAll(); renderLibrary();
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
+})();
+</script>
+</body>
+</html>
